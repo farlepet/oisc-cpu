@@ -1,0 +1,8 @@
+oisc-cpu: An OISC CPU emulator and assembler
+
+Building
+--------
+
+You must have `gcc` installed and be running a linux system
+
+To build, just run `make`
