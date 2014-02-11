@@ -7,7 +7,7 @@
 
 #include <oisc.h>
 
-static uint32_t memsz    = 4096; // Default to 4KiB of memory
+static uint32_t memsz    = 0x2000; // Default to 8KiB of memory
 char           *filename = NULL;
 static uint32_t dmemst   = 0; // Where debug printing starts in memory
 static uint32_t dmemen   = 3; // Where debug printing stops in memory
@@ -38,7 +38,7 @@ int main(int argc, char **argv)
 
 	if((fsize + ENTRYPOINT) > memsz) // Is the program too big to fit into the memory?
 	{
-		printf("File is too large to fit in allocated memory. (%u > %u)", fsize, memsz);
+		printf("File is too large to fit in allocated memory. (%u + %u > %u)", fsize, ENTRYPOINT, memsz);
 		usage(1);
 	}
 
@@ -64,6 +64,7 @@ int main(int argc, char **argv)
 
 		if(debugmem)
 		{
+			printf("{%X}: ", cpu.pc);
 			uint32_t p = dmemst;
 			while(p <= dmemen && p < cpu.mem_size)
 			{

@@ -23,7 +23,7 @@ all: $(CPUOBJ) $(ASMOBJ)
 
 clean:
 	@echo "Cleaning oisc-cpu"
-	@rm -f $(CPUOBJ) $(CPUEXEC) $(ASMEXEC)
+	@rm -f $(CPUOBJ) $(ASMOBJ) $(CPUEXEC) $(ASMEXEC)
 
 %.o: %.c
 	@echo " CC $<"

@@ -1,0 +1,14 @@
+# A simple test file for the oisc assembler
+
+start:
+	0, 0
+	C, Z
+	Z, 0
+	Z, Z
+	-1, -1, -1
+
+Z:
+. 0
+
+C:
+. 999
