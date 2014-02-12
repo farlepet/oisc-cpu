@@ -6,6 +6,7 @@
 #include <string.h>
 
 #include <oisc.h>
+#include <disp.h>
 
 static uint32_t memsz    = 0x2000; // Default to 8KiB of memory
 char           *filename = NULL;
@@ -42,6 +43,8 @@ int main(int argc, char **argv)
 		usage(1);
 	}
 
+	disp_init();
+
 	// Create the CPU structure, and initialize it
 	struct oisc_cpu cpu;
 	cpu.pc       = ENTRYPOINT;
@@ -63,7 +66,17 @@ int main(int argc, char **argv)
 		}
 
 		cpu.mem[ZERO_MEM] = 0; // This must ALWAYS be zero
-		
+
+		// Check STDIN and set
+		char t = 0;
+		if(getch() != ERR)
+			buff_write(t);
+		if(!cpu.mem[SERIAL_RECVD] && ser_buff_loc)
+		{
+			cpu.mem[SERIAL_RECVD] = 1;
+			cpu.mem[SERIAL_IN] = buff_read();
+		}
+
 		if(debugmem)
 		{
 			printf("{%X}: ", cpu.pc);

@@ -17,7 +17,7 @@ CFLAGS  = -Wall -Wextra -Werror -I $(INC)
 
 all: $(CPUOBJ) $(ASMOBJ)
 	@echo " LD $(CPUEXEC)"
-	@$(CC) $(CPUOBJ) -o $(CPUEXEC)
+	@$(CC) $(CPUOBJ) -lncurses -o $(CPUEXEC)
 	@echo " LD $(ASMEXEC)"
 	@$(CC) $(ASMOBJ) -o $(ASMEXEC)
 
