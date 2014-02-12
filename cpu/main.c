@@ -62,6 +62,8 @@ int main(int argc, char **argv)
 			cpu.mem[SERIAL_OUT] = 0;
 		}
 
+		cpu.mem[ZERO_MEM] = 0; // This must ALWAYS be zero
+		
 		if(debugmem)
 		{
 			printf("{%X}: ", cpu.pc);
