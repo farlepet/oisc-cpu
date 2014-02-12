@@ -62,14 +62,13 @@ int main(int argc, char **argv)
 
 	while(fscanf(in, "%[^\n]\n", str) != EOF)
 	{
-		printf("Assembling line: %s\n", str);
 		// Convert entire line to uppercase
 		unsigned i = 0;
 		int not_white = 0, is_comment = 0, colon = 0;
 		for(; i < strlen(str); i++)
 		{
 			str[i] = toupper(str[i]);
-			if(str[i] == ':') colon = 1;
+			if(str[i] == ':' && !is_comment) colon = 1;
 			if(!not_white && str[i] == '#') is_comment = 1;
 			if(!isspace(str[i])) not_white = 1;
 		}
@@ -105,7 +104,7 @@ int main(int argc, char **argv)
 
 		A = get_number(a);
 		B = get_number(b);
-		if(!c) C = (ftell(out) / 4) + 3 + ENTRYPOINT;
+		if(!c || c[0] == '#') C = (ftell(out) / 4) + 3 + ENTRYPOINT;
 		else   C = get_number(c);
 
 		WRITE(A, B, C);
@@ -148,7 +147,7 @@ void find_labels()
 		for(; i < strlen(str); i++)
 		{
 			str[i] = toupper(str[i]);
-			if(str[i] == ':') colon = i; // If it is the first char on the line, ignore it
+			if(str[i] == ':' && !is_comment) colon = i; // If it is the first char on the line, ignore it
 			if(!not_white && str[i] == '#') is_comment = 1;
 			if(!isspace(str[i])) not_white = 1;
 		}
@@ -159,7 +158,6 @@ void find_labels()
 			labels[c_idx].hash = strhash(labels[c_idx].name);
 			labels[c_idx].line = line;
 			labels[c_idx].addr = addr;
-			printf("Found label on line %d at addr %08X with hash %08X: %s\n", line, addr, labels[c_idx].hash, labels[c_idx].name);
 			c_idx++;
 			continue;
 		}
@@ -203,29 +201,39 @@ int find_label(char *name)
 
 int32_t get_number(char *str)
 {
-	int base;
-
 	char *test = str;
+	int sign = 1;
+	if(*str == '-') sign = -1;
 	if(*test == '-' || *test == '+') test++; // ignore sign
 	if(*test == '0')
 	{
-		if(*(test + 1) == 'x') base = 16;
-		else base = 8;
+		test++;
+		if(*test == 'X') return strtol(++test, NULL, 16)*sign;
+		else return strtol(test, NULL, 8)*sign;
 	}
 	else if(isalpha(*test))
 	{
+		uint32_t i = 0;
+		int32_t off = 0; // Signed, because it can be a negative offset
+
+		for(; i < strlen(str); i++)
+		{
+			if(str[i] == '$') // Used to represent an array index
+			{
+				str[i++] = '\0';
+				off = get_number(&str[i]);
+			}
+		}
 		int idx = find_label(str);
 		if(idx == -1)
 		{
 			printf("ERROR: Could not find label: %s", str);
 			exit(1);
 		}
-		printf("DEBUG: Found label: H:%08X A:%08X L:%d N:%s\n", labels[idx].hash, labels[idx].addr, labels[idx].line, labels[idx].name);
-		return labels[idx].addr;
+		return labels[idx].addr + off;
 	}
-	else base = 10;
 
-	return strtol(str, NULL, base);
+	return strtol(test, NULL, 10)*sign;
 }
 
 static struct option long_options[] =
